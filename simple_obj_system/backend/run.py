@@ -1,6 +1,6 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
-from utils.const import SERVER, PORT
+from utils.const import PORT
 from flask import Flask, request, make_response, jsonify
 from markupsafe import escape
 

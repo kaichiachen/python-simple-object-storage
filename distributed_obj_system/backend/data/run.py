@@ -19,11 +19,13 @@ def heatbeat():
 
 @app.route("/partition/<comp_hash>", methods=['GET'])
 def partition(comp_hash):
+   if not os.path.isfile(os.path.join(DIR_PATH, comp_hash)):
+      return Response(status=201)
+
    t = open(os.path.join(DIR_PATH, comp_hash), 'rb')
    res = t.read()
    t.close()
-   print(str(res), flush=True)
-   return res
+   return Response(res, status=200)
 
 def SaveComp(name, data):
    f = open(os.path.join(DIR_PATH, name), 'wb')

@@ -22,15 +22,22 @@ def getVersion(obj_name):
 
 @app.route("/objects/size/<obj_name>", methods=['GET'])
 def getSize(obj_name):
-   if request.method == 'GET':
-      version = request.args.get('version')
-      if version:
-         metadata = DB.getMetadata(name, version)
-         dataSize = metadata['size']
-         return Response({'size': dataSize}, status=200, mimetype='application/json')
+   version = request.args.get('version')
+   if version:
+      metadata = DB.getMetadata(obj_name, version)
+      dataSize = metadata['size']
+      return Response(json.dumps({'size': dataSize}), status=200, mimetype='application/json')
 
    return Response(json.dumps({'size': 0}), status=400, mimetype='application/json')
 
+@app.route("/objects/locate/<obj_name>", methods=['GET'])
+def getLocate(obj_name):
+   version = request.args.get('version')
+   if version:
+      metadata = DB.getMetadata(obj_name, version)
+      return Response(json.dumps(metadata), status=200, mimetype='application/json')
+
+   return Response(json.dumps({}), status=400, mimetype='application/json')
 
 @app.route("/objects/<obj_name>", methods=['GET', 'POST'])
 def handler(obj_name):
@@ -38,14 +45,18 @@ def handler(obj_name):
    if request.method == 'GET':
       version = request.args.get('version')
       start = request.args.get('start')
-      start = start if start else 0
+      start = int(start) if start else 0
       if version:
          data = getObj(obj_name, version)
+         if data == -1:
+            return Response('Object not found', status=400)
+         if data == -2:
+            return Response('Data server is broken', status=400)
          data = data[start:]
          def gen():
             chunk = 10
             for i in range(0,len(data),chunk):
-               yield data[i:i+chunk]
+               yield bytes(data[i:i+chunk])
          return Response(gen(), mimetype='text/xml')
       else:
          reason = 'version not found'

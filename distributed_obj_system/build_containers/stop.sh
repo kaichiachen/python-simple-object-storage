@@ -9,3 +9,4 @@ do
     docker rm "api$v" -f
 done
 
+docker rm frontend -f

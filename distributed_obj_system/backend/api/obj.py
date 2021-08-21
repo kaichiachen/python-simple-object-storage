@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../..'))
 from utils.utils import DB, splitData, combineData, getDataServers
-from utils.const import KAFKA_SERVICE, KAFKA_PORT
+from utils.const import KAFKA_SERVICE, KAFKA_PORT, PORT
 from kafka import KafkaProducer
 import random
 import pickle
@@ -68,10 +68,18 @@ def getObj(name, version):
    data = b''
    for server, idx, size in locate:
       try:
-         data += requests.get(f"http://{server}:{PORT}/partition/{hash}-{idx}", timeout=1).content
+         res = requests.get(f"http://{server}:{PORT}/partition/{hash}-{idx}", timeout=1)
+         if res.status_code == 201:
+            return -1
+         else:
+            data += res.content
       except Exception as e:
          print('request error: %s' % e, flush=True)
-         data += b'X'*size
-
-   return combineData(data)
+         data += b'x'*size
+   print(data, flush=True)
+   try:
+      res = combineData(data)
+      return res
+   except:
+      return -2
 
