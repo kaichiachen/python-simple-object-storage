@@ -40,6 +40,7 @@ def uploadObject(args):
    hash = sha256(content)
    size = len(content)
    chunk = 10
+   idx = 0
    for i in range(0, size, chunk):
       res = requests.post(f"{server_url}/objects/{name}", files={
                                                             'obj': content[i:i+chunk],
@@ -48,7 +49,9 @@ def uploadObject(args):
                                                             'start': i,
                                                             'length': chunk,
                                                             'size': size})
-      print(i, chunk, size, res.status_code)
+      idx+=1
+      print(f'{idx}th times upload, with chunk size: {chunk}, '
+            f'totally object size: {size} and the status code: {res.status_code}')
 
 def downloadObject(args):
    name = args.name
@@ -63,7 +66,7 @@ def downloadObject(args):
    print(f'Size of Object: {size} bytes')
    content = b''
    start = 0
-   while len(content)<size:
+   while len(content) < size:
       try:
          content += requests.get(f"{server_url}/objects/{name}?version={version}&start={start}").content
       except KeyboardInterrupt:

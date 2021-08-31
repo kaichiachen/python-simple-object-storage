@@ -80,6 +80,7 @@ def getObj(name, version):
    try:
       res = combineData(data)
       return res
-   except:
+   except Exception as e:
+      print(e, flush=True)
       return -2
 

@@ -6,8 +6,6 @@ import json
 import datetime
 from .const import REDIS_SERVER, REDIS_PORT
 from reedsolo import RSCodec, ReedSolomonError
-RAID = 6
-rsc = RSCodec(RAID)
 
 import socket
 MyIP = socket.gethostbyname(socket.gethostname())
@@ -27,16 +25,18 @@ class timeout:
    def __exit__(self, type, value, traceback):
       signal.alarm(0)
 
+PARTITION = 6
 def splitData(data):
+   rsc = RSCodec(len(data))
    res = rsc.encode(data)
-   print(res,flush=True)
-   n = len(res)//RAID
-   big_num = len(res)%RAID
+   n = len(res)//PARTITION
+   big_num = len(res)%PARTITION
    left_start = big_num*(n+1)
 
-   return [res[i*(n+1):(i+1)*(n+1)] for i in range(big_num)] + [res[left_start+i*n:left_start+(i+1)*n] for i in range(0, RAID-big_num)]
+   return [res[i*(n+1):(i+1)*(n+1)] for i in range(big_num)] + [res[left_start+i*n:left_start+(i+1)*n] for i in range(0, PARTITION-big_num)]
 
 def combineData(data):
+   rsc = RSCodec(len(data) // 2)
    return rsc.decode(data)[0]
 
 
@@ -54,7 +54,6 @@ def compress(data):
    return zlib.compress(data)
 
 def decompress(data):
-   print(data)
    return zlib.decompress(data)
 
 heartbeatMap = {}
